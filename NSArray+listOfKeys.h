@@ -12,4 +12,10 @@
 
 -(NSString*)commaSeparatedList;
 -(NSString*)commaSeparatedListWithQuoteString:(NSString*)quote;
+-(NSString*)commaSeparatedLowerCaseListWithSeparatorString:(NSString *)sep andQuoteString:(NSString*)quote;
+-(NSString*)commaSeparatedURIEncodedListWithSeparatorString:(NSString *)sep andQuoteString:(NSString*)quote andUnencodedCharacters:(NSCharacterSet*)charset;
+@end
+
+@interface NSDictionary (listOfKeys)
+-(NSString*)sortedCommaSeparatedLowerCaseListWithSeparatorString:(NSString *)sep andQuoteString:(NSString*)quote andValueAssignmentString:(NSString*)valString;
 @end
