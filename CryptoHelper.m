@@ -30,6 +30,16 @@
     return nil;
 }
 
++(NSString*)sha256HexString:(NSData *)data {
+    NSString* sha256 = @"";
+    NSData* sha256Data = [self sha256:data];
+    const unsigned char *buffer = (const unsigned char *)[sha256Data bytes];
+    for (int i = 0; i < sha256Data.length; i++) {
+        sha256 = [sha256 stringByAppendingFormat:@"%02lx", (unsigned long)buffer[i]];
+    }
+    return sha256;
+}
+
 +(NSString *)hmac:(NSString *)plainText withKey:(NSString *)key
 {
     const char *cKey  = [key cStringUsingEncoding:NSUTF8StringEncoding];
