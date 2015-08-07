@@ -11,6 +11,7 @@
 @interface CryptoHelper : NSObject
 +(NSData*)md5:(NSData*)data;
 +(NSString*)md5Base64String:(NSString*)inputString;
++(NSString*)md5Base64StringFromData:(NSData *)inputData;
 +(NSData *)sha1:(NSData *)data;
 +(NSData *)sha256:(NSData *)data;
 +(NSString*)sha256HexString:(NSData*)data;

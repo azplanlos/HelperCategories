@@ -24,6 +24,10 @@
     return [[CryptoHelper md5:[inputString dataUsingEncoding:NSUTF8StringEncoding]] base64String];
 }
 
++(NSString*)md5Base64StringFromData:(NSData *)inputData {
+    return [[CryptoHelper md5:inputData] base64String];
+}
+
 + (NSData *)sha1:(NSData *)data {
     unsigned char hash[CC_SHA1_DIGEST_LENGTH];
     if ( CC_SHA1([data bytes], (int)[data length], hash) ) {
