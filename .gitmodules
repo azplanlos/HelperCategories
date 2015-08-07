@@ -1,0 +1,3 @@
+[submodule "Base64"]
+	path = Base64
+	url = git@github.com:ekscrypto/Base64.git

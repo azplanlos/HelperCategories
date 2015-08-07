@@ -9,12 +9,24 @@
 #import "CryptoHelper.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
+#import <CommonCrypto/CommonKeyDerivation.h>
+#import "../Base64/Base64/MF_Base64Additions.h"
 
 @implementation CryptoHelper
 
++(NSData*)md5:(NSData *)data {
+    uint8_t output[CC_MD5_DIGEST_LENGTH]; CC_MD5(data.bytes, (int)data.length, output);
+    NSData *checksum = [NSData dataWithBytes:output length:CC_MD5_DIGEST_LENGTH];
+    return checksum;
+}
+
++(NSString*)md5Base64String:(NSString *)inputString {
+    return [[CryptoHelper md5:[inputString dataUsingEncoding:NSUTF8StringEncoding]] base64String];
+}
+
 + (NSData *)sha1:(NSData *)data {
     unsigned char hash[CC_SHA1_DIGEST_LENGTH];
-    if ( CC_SHA1([data bytes], [data length], hash) ) {
+    if ( CC_SHA1([data bytes], (int)[data length], hash) ) {
         NSData *sha1 = [NSData dataWithBytes:hash length:CC_SHA1_DIGEST_LENGTH];
         return sha1;
     }
@@ -23,7 +35,7 @@
 
 + (NSData *)sha256:(NSData *)data {
     unsigned char hash[CC_SHA256_DIGEST_LENGTH];
-    if ( CC_SHA256([data bytes], [data length], hash) ) {
+    if ( CC_SHA256([data bytes], (int)[data length], hash) ) {
         NSData *sha1 = [NSData dataWithBytes:hash length:CC_SHA256_DIGEST_LENGTH];
         return sha1;
     }
@@ -77,5 +89,39 @@
     NSData *HMACData = [[NSData alloc] initWithBytes:cHMAC length:sizeof(cHMAC)];
     return HMACData;
 }
+
+// Makes a random 256-bit salt
++(NSData*)generateSalt256 {
+    unsigned char salt[32];
+    for (int i=0; i<32; i++) {
+        salt[i] = (unsigned char)arc4random();
+    }
+    return [NSData dataWithBytes:salt length:32];
+}
+
++(int)hashRoundsForPWLength:(int)pwLength andSaltLength:(int)saltLength maxDuration:(NSTimeInterval)duration {
+    int rounds = CCCalibratePBKDF(kCCPBKDF2, pwLength,
+                                  saltLength, kCCPRFHmacAlgSHA256, 32, duration*1000);
+    return rounds;
+}
+
++(NSData*)createSHA256KeyWithPassphrase:(NSString *)myPass andSalt:(NSData *)salt andRounds:(int)iterations {
+    // Make keys!
+    NSData* myPassData = [myPass dataUsingEncoding:NSUTF8StringEncoding];
+        
+    // Open CommonKeyDerivation.h for help
+    unsigned char key[32];
+    CCKeyDerivationPBKDF(kCCPBKDF2, myPassData.bytes, myPassData.length,
+                         salt.bytes, salt.length, kCCPRFHmacAlgSHA256, iterations, key, 32);
+    NSData* keyData = [NSData dataWithBytes:key length:32];
+    return keyData;
+}
+
++(NSData*)createSHA256KeyWithPassphrase:(NSString*)myPass {
+    NSData* salt = [CryptoHelper generateSalt256];
+    int rounds = [CryptoHelper hashRoundsForPWLength:(int)myPass.length andSaltLength:(int)salt.length maxDuration:1];
+    return [CryptoHelper createSHA256KeyWithPassphrase:myPass andSalt:salt andRounds:rounds];
+}
+
 
 @end

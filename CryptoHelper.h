@@ -9,10 +9,16 @@
 #import <Foundation/Foundation.h>
 
 @interface CryptoHelper : NSObject
++(NSData*)md5:(NSData*)data;
++(NSString*)md5Base64String:(NSString*)inputString;
 +(NSData *)sha1:(NSData *)data;
 +(NSData *)sha256:(NSData *)data;
 +(NSString*)sha256HexString:(NSData*)data;
 +(NSString *)hmac:(NSString *)plainText withKey:(NSString *)key;
 +(NSData*)hmacData:(NSData*)plainData withKey:(NSString*)key;
 +(NSData*)hmac:(NSString*)plainText withDataKey:(NSData*)dataKey;
++(NSData*)createSHA256KeyWithPassphrase:(NSString*)myPass;
++(NSData*)createSHA256KeyWithPassphrase:(NSString *)myPass andSalt:(NSData *)salt andRounds:(int)iterations;
++(NSData*)generateSalt256;
++(int)hashRoundsForPWLength:(int)pwLength andSaltLength:(int)saltLength maxDuration:(NSTimeInterval)duration;
 @end
