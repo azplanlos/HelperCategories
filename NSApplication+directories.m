@@ -7,6 +7,7 @@
 //
 
 #import "NSApplication+directories.h"
+#include <sys/sysctl.h>
 
 @implementation NSApplication (directories)
 
@@ -15,5 +16,28 @@
     NSURL *libraryURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
     return [libraryURL URLByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
 }
+
++ (NSString*) systemInfoString:(const char*)attributeName
+{
+    size_t size;
+    sysctlbyname(attributeName, NULL, &size, NULL, 0); // Get the size of the data.
+    char* attributeValue = malloc(size);
+    int err = sysctlbyname(attributeName, attributeValue, &size, NULL, 0);
+    if (err != 0) {
+        NSLog(@"sysctlbyname(%s) failed: %s", attributeName, strerror(errno));
+        free(attributeValue);
+        return nil;
+    }
+    NSString* vs = [NSString stringWithUTF8String:attributeValue];
+    free(attributeValue);
+    return vs;
+}
+
++ (NSString*) hostName
+{
+    NSArray* components = [[self systemInfoString:"kern.hostname"] componentsSeparatedByString:@"."];
+    return [components objectAtIndex:0];
+}
+
 
 @end

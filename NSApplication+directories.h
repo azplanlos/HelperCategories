@@ -11,5 +11,6 @@
 @interface NSApplication (directories)
 
 +(NSURL*)appSupportURL;
++(NSString*) hostName;
 
 @end
