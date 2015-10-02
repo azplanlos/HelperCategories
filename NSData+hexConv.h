@@ -11,6 +11,8 @@
 @interface NSData (NSData_Conversion)
 
 #pragma mark - String Conversion
++(NSData*)dataWithHexString:(NSString*)hexString;
+
 - (NSString *)hexadecimalString;
 
 @end
