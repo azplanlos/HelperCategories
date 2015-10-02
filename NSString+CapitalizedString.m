@@ -25,4 +25,18 @@
     }
     return capitalisedSentence;
 }
+
+-(NSString*)stringGroupedByNumberOfLetters:(int)numberOfLetters withDelimiterString:(NSString*)delimiter {
+    NSMutableString* retStr = [NSMutableString new];
+    for (int i = 0; i < self.length-numberOfLetters; i += numberOfLetters) {
+        if (i != 0) [retStr appendString:delimiter];
+        [retStr appendString:[self substringWithRange:NSMakeRange(i, numberOfLetters)]];
+        if (i + numberOfLetters > self.length-numberOfLetters) {
+            // rest string
+            [retStr appendString:delimiter];
+            [retStr appendString:[self substringWithRange:NSMakeRange(i+numberOfLetters, self.length-(i+numberOfLetters))]];
+        }
+    }
+    return [NSString stringWithString:retStr];
+}
 @end

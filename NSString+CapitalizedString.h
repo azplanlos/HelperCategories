@@ -10,4 +10,5 @@
 
 @interface NSString (CapitalizedString)
 -(NSString*)stringWithFirstLetterCapitalized;
+-(NSString*)stringGroupedByNumberOfLetters:(int)numberOfLetters withDelimiterString:(NSString*)delimiter;
 @end
