@@ -12,7 +12,8 @@
 
 -(NSArray*)arrayForValuesWithKey:(NSString *)key {
     NSMutableArray* keyPathArray = [NSMutableArray array];
-    for (id elem in self) {
+    for (int i = 0; i < self.count; i++) {
+        id elem = [self objectAtIndex:i];
         if ([elem valueForKey:key]) [keyPathArray addObject:[elem valueForKey:key]];
     }
     return [NSArray arrayWithArray:keyPathArray];
@@ -20,7 +21,8 @@
 
 -(NSArray*)stringArrayForValuesWithKey:(NSString *)key {
     NSMutableArray* keyPathArray = [NSMutableArray array];
-    for (id elem in self) {
+    for (int i = 0; i < self.count; i++) {
+        id elem = [self objectAtIndex:i];
         if ([elem valueForKey:key]) {
             id val = [elem valueForKey:key];
             if ([val isKindOfClass:[NSNumber class]]) {
