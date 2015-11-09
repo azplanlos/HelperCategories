@@ -13,8 +13,11 @@
 
 +(NSURL*)appSupportURL {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSURL *libraryURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
-    return [libraryURL URLByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+    NSURL *libraryURL = [[[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject] URLByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:libraryURL.path]) {
+        [[NSFileManager defaultManager] createDirectoryAtURL:libraryURL withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    return libraryURL;
 }
 
 + (NSString*) systemInfoString:(const char*)attributeName
