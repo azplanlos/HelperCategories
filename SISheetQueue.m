@@ -9,6 +9,7 @@
 #import "SISheetQueue.h"
 #import "NSTimer+BBlock.h"
 #import "NSAlert+BBlock.h"
+#import "NSThread+Blocks.h"
 
 @implementation SISheetQueue
 
@@ -66,24 +67,48 @@ static SISheetQueue* _sisheetqueue;
 -(void)presentSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler {
     if (modalWindow.isVisible) {
         if ([sheet isKindOfClass:[NSAlert class]]) {
-            [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];
+            [[NSThread mainThread] performBlock:^{
+                [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];
+            } waitUntilDone:NO];
         } else if ([sheet isKindOfClass:[NSWindow class]]) {
-            [NSApp beginSheet:sheet modalForWindow:modalWindow completionHandler:handler];
+            [[NSThread mainThread] performBlock:^{
+                [NSApp beginSheet:sheet modalForWindow:modalWindow completionHandler:handler];
+            } waitUntilDone:NO];
         } else {
-            [(NSSavePanel*)sheet beginSheetModalForWindow:modalWindow completionHandler:handler];
+            [[NSThread mainThread] performBlock:^{
+                [(NSSavePanel*)sheet beginSheetModalForWindow:modalWindow completionHandler:handler];
+            } waitUntilDone:NO];
         }
     } else {
+        __block NSInteger button;
         if ([sheet isKindOfClass:[NSAlert class]]) {
-            NSInteger button = [(NSAlert*)sheet runModal];
-            handler(button);
+            if ([NSThread currentThread] != [NSThread mainThread]) {
+                [[NSThread mainThread] performBlock:^{
+                    button = [(NSAlert*)sheet runModal];
+                } waitUntilDone:YES];
+            } else {
+                button = [(NSAlert*)sheet runModal];
+            }
         } else if ([sheet isKindOfClass:[NSWindow class]]) {
-            [sheet makeKeyAndOrderFront:self];
-            NSInteger button = [NSApp runModalForWindow:sheet];
-            handler(button);
+            if ([NSThread currentThread] != [NSThread mainThread]) {
+                [[NSThread mainThread] performBlock:^{
+                    [sheet makeKeyAndOrderFront:self];
+                    button = [NSApp runModalForWindow:sheet];
+                } waitUntilDone:YES];
+            } else {
+                [sheet makeKeyAndOrderFront:self];
+                button = [NSApp runModalForWindow:sheet];
+            }
         } else {
-            NSInteger button = [(NSSavePanel*)sheet runModal];
-            handler(button);
+            if ([NSThread currentThread] != [NSThread mainThread]) {
+                [[NSThread mainThread] performBlock:^{
+                    button = [(NSSavePanel*)sheet runModal];
+                } waitUntilDone:YES];
+            } else {
+                button = [(NSSavePanel*)sheet runModal];
+            }
         }
+        if (handler) handler(button);
     }
 }
 
