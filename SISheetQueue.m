@@ -40,12 +40,12 @@ static SISheetQueue* _sisheetqueue;
 }
 
 -(void)queueSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler {
-    if (![activeWindows objectForKey:modalWindow.identifier]) {
+    if (modalWindow && ![activeWindows objectForKey:modalWindow.identifier]) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sheetDismissed:) name:NSWindowDidEndSheetNotification object:modalWindow];
         NSMutableArray* panelCacheArray = [NSMutableArray new];
         [activeWindows setObject:panelCacheArray forKey:modalWindow.identifier];
     }
-    if (!modalWindow.attachedSheet) {
+    if ((modalWindow && !modalWindow.attachedSheet) || !modalWindow) {
         [self presentSheet:sheet modalForWindow:modalWindow completionHandler:handler];
     } else {
         NSDictionary* saveDict;
@@ -65,7 +65,7 @@ static SISheetQueue* _sisheetqueue;
 }
 
 -(void)presentSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler {
-    if (modalWindow.isVisible) {
+    if (modalWindow && modalWindow.isVisible) {
         if ([sheet isKindOfClass:[NSAlert class]]) {
             [[NSThread mainThread] performBlock:^{
                 [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];

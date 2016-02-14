@@ -1,3 +1,6 @@
 [submodule "Base64"]
 	path = Base64
 	url = git@github.com:ekscrypto/Base64.git
+[submodule "BBlock"]
+	path = BBlock
+	url = git@github.com:azplanlos/BBlock.git
