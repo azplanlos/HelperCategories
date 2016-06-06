@@ -11,4 +11,5 @@
 @interface NSString (urlencode)
 - (NSString *)urlencode;
 - (NSString *)urlencodeWithoutCharactersInSet:(NSCharacterSet*)charset;
+- (NSString *)urldecode;
 @end

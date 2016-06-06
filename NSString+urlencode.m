@@ -34,4 +34,10 @@
     return [self urlencodeWithoutCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
 }
 
+-(NSString*)urldecode {
+    NSString *result = [(NSString *)self stringByReplacingOccurrencesOfString:@"+" withString:@" "];
+    result = [result stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return result;
+}
+
 @end
