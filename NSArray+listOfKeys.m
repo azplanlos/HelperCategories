@@ -11,6 +11,19 @@
 
 @implementation NSArray (listOfKeys)
 
+-(NSString*)listWithSeparater:(NSString *)separatorString {
+    NSMutableString* retStr = [NSMutableString string];
+    int i = 0;
+    for (NSString* prop in self) {
+        if (i != 0) {
+            [retStr appendString:separatorString];
+        }
+        [retStr appendString:prop];
+        i++;
+    }
+    return retStr;
+}
+
 -(NSString*)commaSeparatedListWithQuoteString:(NSString *)quote {
     NSMutableString* retStr = [NSMutableString string];
     int i = 0;

@@ -14,6 +14,7 @@
 -(NSString*)commaSeparatedListWithQuoteString:(NSString*)quote;
 -(NSString*)commaSeparatedLowerCaseListWithSeparatorString:(NSString *)sep andQuoteString:(NSString*)quote;
 -(NSString*)commaSeparatedURIEncodedListWithSeparatorString:(NSString *)sep andQuoteString:(NSString*)quote andUnencodedCharacters:(NSCharacterSet*)charset;
+-(NSString*)listWithSeparater:(NSString*)separatorString;
 @end
 
 @interface NSDictionary (listOfKeys)
