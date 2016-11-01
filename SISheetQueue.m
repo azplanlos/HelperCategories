@@ -112,6 +112,13 @@ static SISheetQueue* _sisheetqueue;
     }
 }
 
+-(BOOL)queuedSheetsForWindow:(NSWindow *)modalWindow {
+    if ([[activeWindows objectForKey:modalWindow.identifier] count] > 0) {
+        return YES;
+    }
+    return NO;
+}
+
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }

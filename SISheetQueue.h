@@ -16,5 +16,6 @@
 +(SISheetQueue*)sharedQueue;
 
 -(void)queueSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler;
+-(BOOL)queuedSheetsForWindow:(NSWindow*)modalWindow;
 
 @end
