@@ -35,6 +35,7 @@ static SISheetQueue* _sisheetqueue;
     self = [super init];
     if (self) {
         activeWindows = [NSMutableDictionary new];
+        lastSheetQueue = [NSDate distantPast];
     }
     return self;
 }
@@ -45,22 +46,29 @@ static SISheetQueue* _sisheetqueue;
         NSMutableArray* panelCacheArray = [NSMutableArray new];
         [activeWindows setObject:panelCacheArray forKey:modalWindow.identifier];
     }
-    if ((modalWindow && !modalWindow.attachedSheet) || !modalWindow) {
+    if (((modalWindow && !modalWindow.attachedSheet) || !modalWindow) && [lastSheetQueue timeIntervalSinceDate:[NSDate date]] <= -1) {
+        NSLog(@"present sheet for %@", modalWindow.identifier);
         [self presentSheet:sheet modalForWindow:modalWindow completionHandler:handler];
     } else {
         NSDictionary* saveDict;
+        NSLog(@"save sheet");
         if (handler) saveDict = @{@"sheet": sheet, @"handler": [handler copy]}; else saveDict = @{@"sheet": sheet};
         [[activeWindows objectForKey:modalWindow.identifier] addObject:saveDict];
     }
+    lastSheetQueue = [NSDate date];
 }
 
 -(void)sheetDismissed:(NSNotification*)notification {
     if (((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)notification.object).identifier]).count > 0) {
-        NSDictionary* nextSheetDict = [((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)notification.object).identifier]) objectAtIndex:0];
-        [((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)notification.object).identifier]) removeObjectAtIndex:0];
-        [NSTimer scheduledTimerWithTimeInterval:0.5 andBlock:^{
-            [self presentSheet:[nextSheetDict valueForKey:@"sheet"] modalForWindow:notification.object completionHandler:[nextSheetDict valueForKey:@"handler"]];
-        }];
+        if (((NSWindow*)notification.object).attachedSheet == nil) {
+            NSDictionary* nextSheetDict = [((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)notification.object).identifier]) objectAtIndex:0];
+            [((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)notification.object).identifier]) removeObjectAtIndex:0];
+            [NSTimer scheduledTimerWithTimeInterval:0.5 andBlock:^{
+                [self presentSheet:[nextSheetDict valueForKey:@"sheet"] modalForWindow:notification.object completionHandler:[nextSheetDict valueForKey:@"handler"]];
+            }];
+        } else {
+            NSLog(@"sheet not ordered out!");
+        }
     }
 }
 
