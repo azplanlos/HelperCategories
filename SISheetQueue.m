@@ -126,6 +126,42 @@ static SISheetQueue* _sisheetqueue;
     }
     return NO;
 }
+    
+-(BOOL)dismissSheet:(id)sheet onWindow:(NSWindow *)modalWindow {
+    if (modalWindow.attachedSheet == sheet) {
+        if ([NSThread currentThread] != [NSThread mainThread]) {
+            [[NSThread mainThread] performBlock:^{
+                [NSApp endSheet:sheet];
+                [sheet orderOut:self];
+                if ([NSApp modalWindow] != nil) {
+                    [NSApp stopModal];
+                }
+            } waitUntilDone:YES];
+        } else {
+            [NSApp endSheet:sheet];
+            [sheet orderOut:self];
+            if ([NSApp modalWindow] != nil) {
+                [NSApp stopModal];
+            }
+        }
+        return YES;
+    } else {
+        NSInteger index = 0;
+        NSInteger sheetIndex = -1;
+        for (id queuedSheetDic in [activeWindows objectForKey:modalWindow.identifier]) {
+            if ([queuedSheetDic objectForKey:@"sheet"] == sheet && sheetIndex == -1) {
+                sheetIndex = index;
+            }
+            index++;
+        }
+        if (sheetIndex >= 0) {
+            [((NSMutableArray*)[activeWindows objectForKey:((NSWindow*)modalWindow).identifier]) removeObjectAtIndex:sheetIndex];
+            return YES;
+        }
+        
+    }
+    return NO;
+}
 
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
