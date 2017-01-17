@@ -47,11 +47,15 @@ static SISheetQueue* _sisheetqueue;
         [activeWindows setObject:panelCacheArray forKey:modalWindow.identifier];
     }
     if (((modalWindow && !modalWindow.attachedSheet) || !modalWindow) && [lastSheetQueue timeIntervalSinceDate:[NSDate date]] <= -1) {
-        NSLog(@"present sheet for %@", modalWindow.identifier);
+#ifdef __DEBUG__
+        NSLog(@"present sheet %@ for %@", sheet, modalWindow.identifier);
+#endif
         [self presentSheet:sheet modalForWindow:modalWindow completionHandler:handler];
     } else {
         NSDictionary* saveDict;
+#ifdef __DEBUG__
         NSLog(@"save sheet");
+#endif
         if (handler) saveDict = @{@"sheet": sheet, @"handler": [handler copy]}; else saveDict = @{@"sheet": sheet};
         [[activeWindows objectForKey:modalWindow.identifier] addObject:saveDict];
     }
@@ -67,25 +71,42 @@ static SISheetQueue* _sisheetqueue;
                 [self presentSheet:[nextSheetDict valueForKey:@"sheet"] modalForWindow:notification.object completionHandler:[nextSheetDict valueForKey:@"handler"]];
             }];
         } else {
+#ifdef __DEBUG__
             NSLog(@"sheet not ordered out!");
+#endif
         }
     }
 }
 
 -(void)presentSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler {
+#ifdef __DEBUG__
+    if (!handler) {
+        NSLog(@"no handler for sheet %@ complete!", sheet);
+    }
+#endif
     if (modalWindow && modalWindow.isVisible) {
-        if ([sheet isKindOfClass:[NSAlert class]]) {
-            [[NSThread mainThread] performBlock:^{
-                [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];
-            } waitUntilDone:NO];
-        } else if ([sheet isKindOfClass:[NSWindow class]]) {
-            [[NSThread mainThread] performBlock:^{
-                [NSApp beginSheet:sheet modalForWindow:modalWindow completionHandler:handler];
-            } waitUntilDone:NO];
+        if ([NSThread currentThread] != [NSThread mainThread]) {
+            if ([sheet isKindOfClass:[NSAlert class]]) {
+                [[NSThread mainThread] performBlock:^{
+                    [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];
+                } waitUntilDone:NO];
+            } else if ([sheet isKindOfClass:[NSWindow class]]) {
+                [[NSThread mainThread] performBlock:^{
+                    [NSApp beginSheet:sheet modalForWindow:modalWindow completionHandler:handler];
+                } waitUntilDone:NO];
+            } else {
+                [[NSThread mainThread] performBlock:^{
+                    [(NSSavePanel*)sheet beginSheetModalForWindow:modalWindow completionHandler:handler];
+                } waitUntilDone:NO];
+            }
         } else {
-            [[NSThread mainThread] performBlock:^{
+            if ([sheet isKindOfClass:[NSAlert class]]) {
+                [((NSAlert*)sheet) beginSheetModalForWindow:modalWindow completionHandler:handler contextInfo:NULL];
+            } else if ([sheet isKindOfClass:[NSWindow class]]) {
+                [NSApp beginSheet:sheet modalForWindow:modalWindow completionHandler:handler];
+            } else {
                 [(NSSavePanel*)sheet beginSheetModalForWindow:modalWindow completionHandler:handler];
-            } waitUntilDone:NO];
+            }
         }
     } else {
         __block NSInteger button;
@@ -136,6 +157,7 @@ static SISheetQueue* _sisheetqueue;
                 if ([NSApp modalWindow] != nil) {
                     [NSApp stopModal];
                 }
+                [NSThread sleepForTimeInterval:1];
             } waitUntilDone:YES];
         } else {
             [NSApp endSheet:sheet];
@@ -143,6 +165,7 @@ static SISheetQueue* _sisheetqueue;
             if ([NSApp modalWindow] != nil) {
                 [NSApp stopModal];
             }
+            [NSThread sleepForTimeInterval:1];
         }
         return YES;
     } else {
