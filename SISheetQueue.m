@@ -35,6 +35,7 @@ static SISheetQueue* _sisheetqueue;
     self = [super init];
     if (self) {
         activeWindows = [NSMutableDictionary new];
+        allWindows = [NSMutableDictionary new];
         lastSheetQueue = [NSDate distantPast];
     }
     return self;
@@ -45,6 +46,7 @@ static SISheetQueue* _sisheetqueue;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sheetDismissed:) name:NSWindowDidEndSheetNotification object:modalWindow];
         NSMutableArray* panelCacheArray = [NSMutableArray new];
         [activeWindows setObject:panelCacheArray forKey:modalWindow.identifier];
+        [allWindows setObject:modalWindow forKey:modalWindow.identifier];
     }
     if (((modalWindow && !modalWindow.attachedSheet) || !modalWindow) && [lastSheetQueue timeIntervalSinceDate:[NSDate date]] <= -1) {
 #ifdef __DEBUG__
@@ -187,9 +189,9 @@ static SISheetQueue* _sisheetqueue;
 }
 
 -(BOOL)dismissSheet:(id)sheet {
-    NSArray* wins = [activeWindows allKeys];
-    for (id win in wins) {
-        if ([self dismissSheet:sheet onWindow:win]) return YES;
+    NSArray* wins = [allWindows allKeys];
+    for (NSString* win in wins) {
+        if ([self dismissSheet:sheet onWindow:[allWindows objectForKey:win]]) return YES;
     }
     return NO;
 }

@@ -12,6 +12,7 @@
 @interface SISheetQueue : NSObject {
     NSMutableDictionary* activeWindows;
     NSDate* lastSheetQueue;
+    NSMutableDictionary* allWindows;
 }
 
 +(SISheetQueue*)sharedQueue;
