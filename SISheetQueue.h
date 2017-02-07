@@ -19,5 +19,6 @@
 -(void)queueSheet:(id)sheet modalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger returnCode))handler;
 -(BOOL)queuedSheetsForWindow:(NSWindow*)modalWindow;
 -(BOOL)dismissSheet:(id)sheet onWindow:(NSWindow*)modalWindow;
+-(BOOL)dismissSheet:(id)sheet;
 
 @end

@@ -186,6 +186,14 @@ static SISheetQueue* _sisheetqueue;
     return NO;
 }
 
+-(BOOL)dismissSheet:(id)sheet {
+    NSArray* wins = [activeWindows allKeys];
+    for (id win in wins) {
+        if ([self dismissSheet:sheet onWindow:win]) return YES;
+    }
+    return NO;
+}
+
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
